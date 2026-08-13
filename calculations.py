@@ -401,7 +401,9 @@ def load_measurement_csv(source: bytes | bytearray | str | BinaryIO) -> pd.DataF
     invalid_rows: set[int] = set()
     for column in result.columns:
         values = result[column]
-        if values.dtype == object:
+        if pd.api.types.is_object_dtype(values.dtype) or pd.api.types.is_string_dtype(
+            values.dtype
+        ):
             values = values.astype(str).str.strip().str.replace(",", ".", regex=False)
         numeric = pd.to_numeric(values, errors="coerce")
         invalid = numeric.isna() | ~np.isfinite(numeric.to_numpy(dtype=float))
