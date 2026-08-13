@@ -89,6 +89,19 @@ def test_invalid_csv_is_rejected(content: bytes, message: str) -> None:
         load_measurement_csv(content)
 
 
+def test_invalid_german_csv_reports_only_the_actual_row_with_pandas_string_dtype() -> None:
+    content = (
+        "omega_rad_s;magnitude_db;phase_deg\n"
+        "0,1;kein_wert;-95,111\n"
+        "1;-2,900;-134,500\n"
+    ).encode("utf-8")
+
+    with pytest.raises(CsvValidationError) as error:
+        load_measurement_csv(content)
+
+    assert str(error.value) == "Ungültige oder fehlende Zahlenwerte in CSV-Zeile 2."
+
+
 def test_exact_measurements_have_zero_error_even_with_wrapped_phase() -> None:
     omega = np.array([0.2, 1.0, 5.0])
     analysis = analyze_system([1], [1, 1, 0], omega)
